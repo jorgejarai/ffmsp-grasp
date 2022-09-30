@@ -1,5 +1,3 @@
-#include "greedy.h"
-
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -8,6 +6,7 @@
 #include <set>
 #include <stdexcept>
 
+#include "ffmsp.h"
 #include "rng.h"
 
 static const std::vector<char> ALPHABET{'A', 'C', 'G', 'T'};
@@ -74,35 +73,7 @@ static char least_common_char(const std::map<char, std::size_t>& column) {
     return RNG::get_instance().rand_choose(least_common_chars);
 }
 
-// Hamming distance between str1 and str2
-static std::size_t d(const std::string& str1, const std::string& str2) {
-    const std::size_t min_size = std::min(str1.size(), str2.size());
-
-    std::size_t distance = 0;
-    for (std::size_t i = 0; i < min_size; ++i) {
-        if (str1[i] != str2[i]) {
-            ++distance;
-        }
-    }
-
-    return distance;
-}
-
-std::size_t calculate_metric(const std::vector<std::string>& strings,
-                             const std::string& candidate,
-                             std::size_t threshold_count) {
-    std::size_t metric = 0;
-
-    for (const auto& str : strings) {
-        if (d(str, candidate) >= threshold_count) {
-            ++metric;
-        }
-    }
-
-    return metric;
-}
-
-bool random_iteration(double alpha) {
+static bool random_iteration(double alpha) {
     if (alpha >= 1.0) {
         return false;
     }
@@ -164,7 +135,7 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
             const std::string candidate = word + c;
 
             for (const auto& str : strings) {
-                const std::size_t distance = d(candidate, str);
+                const std::size_t distance = hamming(candidate, str);
 
                 if (distance >= threshold_count) {
                     strings_over_threshold[c]++;
@@ -202,7 +173,7 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
         word.push_back(RNG::get_instance().rand_choose(most_common_candidates));
     }
 
-    const auto metric = calculate_metric(strings, word, threshold_count);
+    const auto metric = ffmsp::metric(strings, word, threshold);
 
     return {word, metric};
 }

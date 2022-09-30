@@ -1,6 +1,6 @@
 # `ffmsp-greedy`
 
-Proyecto para resolver el problema FFMSP utilizando heurísticas *greedy*.
+Proyecto para resolver el problema FFMSP utilizando una metaheurística GRASP>
 
 ## Instrucciones para compilar
 

@@ -12,9 +12,10 @@ public:
     }
 
 private:
+    std::random_device m_rd;
     std::mt19937 m_gen;
 
-    static constexpr int m_seed = 0;
+    // static constexpr int m_seed = 0;
 
     RNG();
 

@@ -6,7 +6,8 @@
 #include <vector>
 
 #include "args.h"
-#include "greedy.h"
+#include "ffmsp.h"
+#include "rng.h"
 #include "timer.h"
 
 #define STRING_COUNT 10
@@ -17,33 +18,43 @@ const std::vector<Arguments::ArgDefinition> args_list{
     {'i', Arguments::ArgDefinition::STRING, false},
     {'t', Arguments::ArgDefinition::STRING, true},
     {'h', Arguments::ArgDefinition::DOUBLE, false},
-};
+    {'a', Arguments::ArgDefinition::DOUBLE, false},
+    {
+        'm',
+        Arguments::ArgDefinition::INT,
+        false,
+    }};
 
-int main(int argc, char* argv[]) {
-    Arguments args(args_list, argc, argv);
-
+void check_args(const Arguments& args) {
     const auto instance_arg = args.get<std::string>('i');
     const auto threshold_arg = args.get<double>('h');
+    const auto alpha_arg = args.get<double>('a');
+    const auto max_time_arg = args.get<int>('m');
 
-    if (!instance_arg || !threshold_arg) {
-        return 1;
+    if (!instance_arg || !threshold_arg || !max_time_arg) {
+        std::exit(1);
     }
 
-    const auto instance = instance_arg.value();
     const auto threshold = threshold_arg.value();
+    const auto alpha = alpha_arg.value_or(1.0);
+    const auto max_time = max_time_arg.value();
 
-    if (threshold < 0 || threshold > 1) {
-        return 1;
+    if (threshold < 0 || threshold > 1 || alpha < 0 || alpha > 1 ||
+        max_time < 0) {
+        std::exit(1);
     }
+}
 
+std::vector<std::string> read_file(const std::string& path) {
     std::ifstream instance_file;
-    instance_file.open(instance);
+    instance_file.open(path);
 
     if (!instance_file.is_open()) {
-        return 1;
+        std::exit(1);
     }
 
-    std::vector<std::string> strings;
+    std::vector<std::string> ret;
+
     while (!instance_file.eof()) {
         std::string line;
         getline(instance_file, line);
@@ -52,20 +63,30 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        strings.push_back(line);
+        ret.push_back(line);
     }
 
     instance_file.close();
 
-    double time;
+    return ret;
+}
 
-    {
-        Timer t(time);
-        const auto [result, fitness] = ffmsp::greedy(strings, threshold);
-        std::cout << fitness << ",";
-    }
+int main(int argc, char* argv[]) {
+    const Arguments args(args_list, argc, argv);
+    check_args(args);
 
-    std::cout << time << '\n';
+    const auto instance = args.get<std::string>('i').value();
+    const auto threshold = args.get<double>('h').value();
+    const auto alpha = args.get<double>('a').value_or(1.0);
+    const auto max_time = args.get<int>('m').value();
+
+    const auto strings = read_file(instance);
+
+    const auto greedy_result = ffmsp::random_greedy(strings, threshold, alpha);
+    std::cout << "Greedy: " << greedy_result.metric << std::endl;
+
+    const auto grasp_result = ffmsp::grasp(strings, threshold, alpha, max_time);
+    std::cout << "GRASP: " << grasp_result.metric << std::endl;
 
     return 0;
 }

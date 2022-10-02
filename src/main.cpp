@@ -12,32 +12,29 @@
 
 #define STRING_COUNT 10
 
-// Treat -th as -t -h (the threshold value will actually be contained in the -h
-// argument)
 const std::vector<Arguments::ArgDefinition> args_list{
     {'i', Arguments::ArgDefinition::STRING, false},
-    {'t', Arguments::ArgDefinition::STRING, true},
-    {'h', Arguments::ArgDefinition::DOUBLE, false},
-    {'a', Arguments::ArgDefinition::DOUBLE, false},
+    {'t', Arguments::ArgDefinition::DOUBLE, false},
+    {'a', Arguments::ArgDefinition::DOUBLE, true},
     {
         'm',
         Arguments::ArgDefinition::INT,
-        false,
+        true,
     }};
 
 void check_args(const Arguments& args) {
     const auto instance_arg = args.get<std::string>('i');
-    const auto threshold_arg = args.get<double>('h');
+    const auto threshold_arg = args.get<double>('t');
     const auto alpha_arg = args.get<double>('a');
     const auto max_time_arg = args.get<int>('m');
 
-    if (!instance_arg || !threshold_arg || !max_time_arg) {
+    if (!instance_arg || !threshold_arg) {
         std::exit(1);
     }
 
     const auto threshold = threshold_arg.value();
-    const auto alpha = alpha_arg.value_or(1.0);
-    const auto max_time = max_time_arg.value();
+    const auto alpha = alpha_arg.value_or(0.9);
+    const auto max_time = max_time_arg.value_or(30);
 
     if (threshold < 0 || threshold > 1 || alpha < 0 || alpha > 1 ||
         max_time < 0) {
@@ -76,9 +73,9 @@ int main(int argc, char* argv[]) {
     check_args(args);
 
     const auto instance = args.get<std::string>('i').value();
-    const auto threshold = args.get<double>('h').value();
-    const auto alpha = args.get<double>('a').value_or(1.0);
-    const auto max_time = args.get<int>('m').value();
+    const auto threshold = args.get<double>('t').value();
+    const auto alpha = args.get<double>('a').value_or(0.9);
+    const auto max_time = args.get<int>('m').value_or(30);
 
     const auto strings = read_file(instance);
 

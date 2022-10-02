@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <future>
+#include <iomanip>
 #include <iostream>
 #include <optional>
 #include <set>
@@ -48,8 +49,11 @@ static std::string local_search(const std::vector<std::string>& strings,
 
 ffmsp::result ffmsp::grasp(const std::vector<std::string>& strings,
                            double threshold, double alpha, int max_time) {
+    using std::chrono::duration;
     using std::chrono::high_resolution_clock;
     using std::chrono::seconds;
+
+    std::cout << std::fixed << std::setprecision(3);
 
     const auto metric = [&strings, threshold](const std::string& candidate) {
         return ffmsp::metric(strings, candidate, threshold);
@@ -70,8 +74,17 @@ ffmsp::result ffmsp::grasp(const std::vector<std::string>& strings,
         if (candidate_metric > best_metric) {
             best_solution = candidate;
             best_metric = candidate_metric;
+
+            const duration<double> elapsed =
+                high_resolution_clock::now() - start;
+
+            std::cout << "[" << elapsed.count() << "] fitness:" << best_metric
+                      << "\n";
         }
     } while (high_resolution_clock::now() - start < seconds(max_time));
+
+    const duration<double> elapsed = high_resolution_clock::now() - start;
+    std::cout << "[" << elapsed.count() << "] fitness:" << best_metric << "\n";
 
     return {best_solution, best_metric};
 }

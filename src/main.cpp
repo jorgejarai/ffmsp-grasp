@@ -82,11 +82,7 @@ int main(int argc, char* argv[]) {
 
     const auto strings = read_file(instance);
 
-    const auto greedy_result = ffmsp::random_greedy(strings, threshold, alpha);
-    std::cout << "Greedy: " << greedy_result.metric << std::endl;
-
-    const auto grasp_result = ffmsp::grasp(strings, threshold, alpha, max_time);
-    std::cout << "GRASP: " << grasp_result.metric << std::endl;
+    ffmsp::grasp(strings, threshold, alpha, max_time);
 
     return 0;
 }

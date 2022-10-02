@@ -78,13 +78,13 @@ ffmsp::result ffmsp::grasp(const std::vector<std::string>& strings,
             const duration<double> elapsed =
                 high_resolution_clock::now() - start;
 
-            std::cout << "[" << elapsed.count() << "] fitness:" << best_metric
+            std::cout << "[" << elapsed.count() << "] Fitness: " << best_metric
                       << "\n";
         }
     } while (high_resolution_clock::now() - start < seconds(max_time));
 
     const duration<double> elapsed = high_resolution_clock::now() - start;
-    std::cout << "[" << elapsed.count() << "] fitness:" << best_metric << "\n";
+    std::cout << "[" << elapsed.count() << "] Fitness: " << best_metric << "\n";
 
     return {best_solution, best_metric};
 }

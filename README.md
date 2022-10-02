@@ -1,6 +1,6 @@
 # `ffmsp-greedy`
 
-Proyecto para resolver el problema FFMSP utilizando una metaheurística GRASP>
+Proyecto para resolver el problema FFMSP utilizando una metaheurística GRASP.
 
 ## Instrucciones para compilar
 
@@ -18,8 +18,9 @@ $ make
 ## Ejecución
 
 ```console
-$ ./build/greedy -i <ruta_instancia> -th <umbral>
-$ ./build/greedy_rnd -i <ruta_instancia> -th <umbral> -a <coef_determinismo>
+$ ./build/grasp -i <instancia> -t <tiempo_max> [-a <alfa>] [-u <umbral>]
 ```
-
-Los archivos del dataset no están incluidos en este repositorio.
+- `-i`: La ruta al archivo de texto con la instancia a probar
+- `-t`: El umbral (*threshold*) sobre el que va a correr el algoritmo
+- `-a`: Coeficiente de determinismo (0.9 por defecto)
+- `-u`: Umbral para la selección de candidatos (0.8 por defecto)

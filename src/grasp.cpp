@@ -74,17 +74,10 @@ ffmsp::result ffmsp::grasp(const std::vector<std::string>& strings,
         if (candidate_metric > best_metric) {
             best_solution = candidate;
             best_metric = candidate_metric;
-
-            const duration<double> elapsed =
-                high_resolution_clock::now() - start;
-
-            std::cout << "[" << elapsed.count() << "] Fitness: " << best_metric
-                      << "\n";
         }
     } while (high_resolution_clock::now() - start < seconds(max_time));
 
-    const duration<double> elapsed = high_resolution_clock::now() - start;
-    std::cout << "[" << elapsed.count() << "] Fitness: " << best_metric << "\n";
+    std::cout << -static_cast<int>(best_metric) << "\n";
 
     return {best_solution, best_metric};
 }

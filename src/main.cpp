@@ -7,7 +7,9 @@
 
 #include "args.h"
 #include "ffmsp.h"
+#include "genetic/mutation.h"
 #include "rng.h"
+#include "string.h"
 #include "timer.h"
 
 #define STRING_COUNT 10
@@ -69,17 +71,21 @@ std::vector<std::string> read_file(const std::string& path) {
 }
 
 int main(int argc, char* argv[]) {
-    const Arguments args(args_list, argc, argv);
-    check_args(args);
+    std::string test = "TAGCTACGATCGATC";
 
-    const auto instance = args.get<std::string>('i').value();
-    const auto threshold = args.get<double>('u').value_or(0.8);
-    const auto alpha = args.get<double>('a').value_or(0.9);
-    const auto max_time = args.get<int>('t').value();
+    std::cout << genetic::mutation::bit_flip(test);
 
-    const auto strings = read_file(instance);
+    // const Arguments args(args_list, argc, argv);
+    // check_args(args);
 
-    ffmsp::grasp(strings, threshold, alpha, max_time);
+    // const auto instance = args.get<std::string>('i').value();
+    // const auto threshold = args.get<double>('u').value_or(0.8);
+    // const auto alpha = args.get<double>('a').value_or(0.9);
+    // const auto max_time = args.get<int>('t').value();
+
+    // const auto strings = read_file(instance);
+
+    // ffmsp::grasp(strings, threshold, alpha, max_time);
 
     return 0;
 }

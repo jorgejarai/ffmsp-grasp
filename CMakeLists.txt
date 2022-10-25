@@ -27,4 +27,4 @@ enable_cxx_compiler_flag_if_supported("-pedantic")
 
 include_directories(include)
 
-add_executable(grasp src/main.cpp src/ffmsp.cpp src/grasp.cpp src/greedy.cpp src/args.cpp src/timer.cpp src/rng.cpp)
+add_executable(grasp src/main.cpp src/ffmsp.cpp src/grasp.cpp src/greedy.cpp src/args.cpp src/timer.cpp src/rng.cpp src/mutation.cpp)

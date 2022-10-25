@@ -1,0 +1,3 @@
+[submodule "3rdparty/argumentum"]
+	path = 3rdparty/argumentum
+	url = https://github.com/mmahnic/argumentum.git

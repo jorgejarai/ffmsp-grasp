@@ -10,6 +10,8 @@ namespace genetic {
 namespace mutation {
 
 std::string bit_flip(const std::string& str);
+std::string swap_mutation(const std::string& str);
+std::string scramble_mutation(const std::string& str);
 
 }  // namespace mutation
 

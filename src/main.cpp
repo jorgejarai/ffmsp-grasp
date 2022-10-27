@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "args.h"
+#include "argumentum/argparse.h"
 #include "ffmsp.h"
 #include "genetic/mutation.h"
 #include "rng.h"
@@ -13,36 +14,6 @@
 #include "timer.h"
 
 #define STRING_COUNT 10
-
-const std::vector<Arguments::ArgDefinition> args_list{
-    {'i', Arguments::ArgDefinition::STRING, false},
-    {'t', Arguments::ArgDefinition::INT, false},
-    {'u', Arguments::ArgDefinition::DOUBLE, true},
-    {
-        'a',
-        Arguments::ArgDefinition::DOUBLE,
-        true,
-    }};
-
-void check_args(const Arguments& args) {
-    const auto instance_arg = args.get<std::string>('i');
-    const auto threshold_arg = args.get<double>('u');
-    const auto alpha_arg = args.get<double>('a');
-    const auto max_time_arg = args.get<int>('t');
-
-    if (!instance_arg || !max_time_arg) {
-        std::exit(1);
-    }
-
-    const auto threshold = threshold_arg.value_or(0.8);
-    const auto alpha = alpha_arg.value_or(0.9);
-    const auto max_time = max_time_arg.value();
-
-    if (threshold < 0 || threshold > 1 || alpha < 0 || alpha > 1 ||
-        max_time < 0) {
-        std::exit(1);
-    }
-}
 
 std::vector<std::string> read_file(const std::string& path) {
     std::ifstream instance_file;
@@ -71,21 +42,29 @@ std::vector<std::string> read_file(const std::string& path) {
 }
 
 int main(int argc, char* argv[]) {
-    std::string test = "TAGCTACGATCGATC";
+    auto parser = argumentum::argument_parser{};
+    auto params = parser.params();
 
-    std::cout << genetic::mutation::bit_flip(test);
+    parser.config().program(argv[0]);
 
-    // const Arguments args(args_list, argc, argv);
-    // check_args(args);
+    std::string instance;
+    double alpha;
+    double threshold;
+    int timeout;
 
-    // const auto instance = args.get<std::string>('i').value();
-    // const auto threshold = args.get<double>('u').value_or(0.8);
-    // const auto alpha = args.get<double>('a').value_or(0.9);
-    // const auto max_time = args.get<int>('t').value();
+    params.add_parameter(instance, "-i").nargs(1);
+    params.add_parameter(alpha, "-a").nargs(1);
+    params.add_parameter(threshold, "--th").nargs(1);
+    params.add_parameter(timeout, "-t").nargs(1);
 
-    // const auto strings = read_file(instance);
+    if (!parser.parse_args(argc, argv, 1)) {
+        return 1;
+    }
 
-    // ffmsp::grasp(strings, threshold, alpha, max_time);
+    std::cout << instance << '\n';
+    std::cout << alpha << '\n';
+    std::cout << threshold << '\n';
+    std::cout << timeout << '\n';
 
     return 0;
 }

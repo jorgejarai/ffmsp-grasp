@@ -30,6 +30,8 @@ enable_cxx_compiler_flag_if_supported("-pedantic")
 include_directories(include)
 include_directories(3rdparty/argumentum/include)
 
-add_executable(grasp src/main.cpp src/ffmsp.cpp src/grasp.cpp src/greedy.cpp src/args.cpp src/timer.cpp src/rng.cpp src/crossover.cpp)
+add_executable(grasp src/main.cpp src/ffmsp.cpp src/grasp.cpp src/greedy.cpp
+    src/args.cpp src/timer.cpp src/rng.cpp src/crossover.cpp src/selection.cpp
+    src/mutation.cpp)
 target_link_libraries(grasp argumentum)
 add_dependencies(grasp argumentum)

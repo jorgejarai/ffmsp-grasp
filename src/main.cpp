@@ -5,7 +5,6 @@
 #include <thread>
 #include <vector>
 
-#include "args.h"
 #include "argumentum/argparse.h"
 #include "ffmsp.h"
 #include "genetic/mutation.h"
@@ -51,20 +50,34 @@ int main(int argc, char* argv[]) {
     double alpha;
     double threshold;
     int timeout;
+    int crossover;
+    int mutation;
+    int selection;
+    double crossover_rate;
+    double mutation_rate;
+    bool tuning;
 
     params.add_parameter(instance, "-i").nargs(1);
     params.add_parameter(alpha, "-a").nargs(1);
     params.add_parameter(threshold, "--th").nargs(1);
     params.add_parameter(timeout, "-t").nargs(1);
+    params.add_parameter(crossover, "--crossover").nargs(1);
+    params.add_parameter(mutation, "--mutation").nargs(1);
+    params.add_parameter(selection, "--selection").nargs(1);
+    params.add_parameter(crossover_rate, "--cross-rate").nargs(1);
+    params.add_parameter(mutation_rate, "--mut-rate").nargs(1);
+    params.add_parameter(tuning, "--tuning").nargs(0);
 
     if (!parser.parse_args(argc, argv, 1)) {
         return 1;
     }
 
-    std::cout << instance << '\n';
-    std::cout << alpha << '\n';
-    std::cout << threshold << '\n';
-    std::cout << timeout << '\n';
+    const auto strings = read_file(instance);
+
+    ffmsp::genetic(strings, threshold, alpha, timeout, crossover_rate,
+                   mutation_rate, static_cast<ffmsp::crossover_type>(crossover),
+                   static_cast<ffmsp::mutation_type>(mutation),
+                   static_cast<ffmsp::selection_type>(selection), tuning);
 
     return 0;
 }

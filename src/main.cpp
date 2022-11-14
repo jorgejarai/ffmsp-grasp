@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     params.add_parameter(crossover, "--crossover").nargs(1);
     params.add_parameter(mutation, "--mutation").nargs(1);
     params.add_parameter(selection, "--selection").nargs(1);
-    params.add_parameter(crossover_rate, "--replace-rate").nargs(1);
+    params.add_parameter(crossover_rate, "--cross-rate").nargs(1);
     params.add_parameter(mutation_rate, "--mut-rate").nargs(1);
     params.add_parameter(tuning, "--tuning").nargs(0);
 

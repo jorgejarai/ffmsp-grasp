@@ -102,22 +102,35 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
         }
     }
 
-    std::string word;
+    std::string word(string_len, ' ');
     const std::size_t threshold_count = threshold * string_len;
+
+    std::vector<std::size_t> used_positions(string_len);
+    std::iota(used_positions.begin(), used_positions.end(), 0);
 
     // Randomly construct the string until the threshold is reached
     for (std::size_t i = 0; i < threshold_count; ++i) {
+        std::size_t pos = RNG::get_instance().rand_choose(used_positions);
+        used_positions.erase(
+            std::remove(used_positions.begin(), used_positions.end(), pos),
+            used_positions.end());
+
         if (random_iteration(alpha)) {
-            word.push_back(RNG::get_instance().rand_choose(ALPHABET));
+            word[pos] = RNG::get_instance().rand_choose(ALPHABET);
             continue;
         }
 
-        word.push_back(least_common_char(V_j[i]));
+        word[pos] = least_common_char(V_j[pos]);
     }
 
     for (std::size_t i = threshold_count; i < string_len; ++i) {
+        std::size_t pos = RNG::get_instance().rand_choose(used_positions);
+        used_positions.erase(
+            std::remove(used_positions.begin(), used_positions.end(), pos),
+            used_positions.end());
+
         if (random_iteration(alpha)) {
-            word.push_back(RNG::get_instance().rand_choose(ALPHABET));
+            word[pos] = RNG::get_instance().rand_choose(ALPHABET);
             continue;
         }
 
@@ -132,7 +145,8 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
 
         // Calculate the metric for every possible candidate
         for (const auto& c : ALPHABET) {
-            const std::string candidate = word + c;
+            std::string candidate(word);
+            candidate[pos] = c;
 
             for (const auto& str : strings) {
                 const std::size_t distance = hamming(candidate, str);
@@ -148,7 +162,7 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
         if (std::all_of(strings_over_threshold.begin(),
                         strings_over_threshold.end(),
                         [](const auto& p) { return p.second == 0; })) {
-            word.push_back(least_common_char(V_j[i]));
+            word[pos] = least_common_char(V_j[pos]);
             continue;
         }
 
@@ -170,7 +184,12 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
                            : std::nullopt;
             });
 
-        word.push_back(RNG::get_instance().rand_choose(most_common_candidates));
+        word[pos] = RNG::get_instance().rand_choose(most_common_candidates);
+    }
+
+    if (!used_positions.empty()) {
+        std::cerr << "ERROR ERROR\n";
+        std::exit(1);
     }
 
     const auto metric = ffmsp::metric(strings, word, threshold);

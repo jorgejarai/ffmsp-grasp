@@ -14,8 +14,10 @@ std::string genetic::mutation::bit_flip(const std::string& str) {
 }
 
 std::string genetic::mutation::swap_mutation(const std::string& str) {
-    auto swap_position1 = RNG::get_instance().rand_int(0, str.size() - 1);
-    auto swap_position2 = RNG::get_instance().rand_int(0, str.size() - 1);
+    std::size_t swap_position1 =
+        RNG::get_instance().rand_int(0, str.size() - 1);
+    std::size_t swap_position2 =
+        RNG::get_instance().rand_int(0, str.size() - 1);
     std::string ret{str};
     auto aux = ret[swap_position1];
     ret[swap_position1] = ret[swap_position2];
@@ -24,9 +26,9 @@ std::string genetic::mutation::swap_mutation(const std::string& str) {
 }
 
 std::string genetic::mutation::scramble_mutation(const std::string& str) {
-    auto scramble_position_start =
+    std::size_t scramble_position_start =
         RNG::get_instance().rand_int(0, str.size() - 1);
-    auto scramble_position_end =
+    std::size_t scramble_position_end =
         RNG::get_instance().rand_int(0, str.size() - 1);
     if (scramble_position_end < scramble_position_start) {
         auto aux = scramble_position_start;

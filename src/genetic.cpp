@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <functional>
@@ -25,26 +26,30 @@ static std::pair<std::string, std::size_t> calculate_best(const T& pop) {
 std::string crossover_fn(ffmsp::crossover_type type, std::string& str1,
                          const std::string& str2) {
     switch (type) {
-    case ffmsp::UNIFORM:
-        return genetic::crossover::one_point(str1, str2);
     case ffmsp::SINGLE_POINT:
-        return genetic::crossover::two_point(str1, str2);
+        return genetic::crossover::one_point(str1, str2);
     case ffmsp::TWO_POINT:
+        return genetic::crossover::two_point(str1, str2);
+    case ffmsp::UNIFORM:
+    default:
         return genetic::crossover::uniform(str1, str2);
     }
-};
+}
 
 std::string selection_fn(
     ffmsp::selection_type type,
     const std::vector<std::pair<std::string, std::size_t>>& pop) {
     switch (type) {
-    case ffmsp::TOURNAMENT:
-        return genetic::selection::tournament(pop, 3);
     case ffmsp::ROULETTE:
         return genetic::selection::roulette(pop);
     case ffmsp::RANDOM:
         return genetic::selection::random(pop);
+    case ffmsp::TOURNAMENT:
+    default:
+        return genetic::selection::tournament(pop, 3);
     }
+
+    return "";
 }
 
 std::string mutation_fn(ffmsp::mutation_type type, const std::string& str) {
@@ -54,8 +59,11 @@ std::string mutation_fn(ffmsp::mutation_type type, const std::string& str) {
     case ffmsp::SWAP:
         return genetic::mutation::swap_mutation(str);
     case ffmsp::SCRAMBLE:
+    default:
         return genetic::mutation::scramble_mutation(str);
     }
+
+    return "";
 }
 
 ffmsp::result ffmsp::genetic(const std::vector<std::string>& strings,
@@ -86,8 +94,8 @@ ffmsp::result ffmsp::genetic(const std::vector<std::string>& strings,
         metrics[res.str] = res.metric;
 
         if (!tuning) {
-            std::cout << "\rSeeding initial population (" << i << "/"
-                      << initial_pop << ")";
+            std::cout << "\rSeeding initial population (" << i + 1 << "/"
+                      << initial_pop << ")" << std::flush;
         }
     }
 
@@ -99,6 +107,10 @@ ffmsp::result ffmsp::genetic(const std::vector<std::string>& strings,
 
     std::string best_solution = first_best.first;
     std::size_t best_metric = first_best.second;
+
+    if (!tuning) {
+        std::cout << "Best greedy fitness: " << best_metric << "\n";
+    }
 
     const auto start = high_resolution_clock::now();
     do {
@@ -132,7 +144,10 @@ ffmsp::result ffmsp::genetic(const std::vector<std::string>& strings,
         }
 
         // Matar a la generación anterior (std::move)
-        population = std::move(new_population);
+        population.clear();
+        population.reserve(new_population.size());
+        std::move(new_population.begin(), new_population.end(),
+                  std::back_inserter(population));
 
         // Mutar a las nuevas soluciones
         for (auto& str : population) {
@@ -159,14 +174,15 @@ ffmsp::result ffmsp::genetic(const std::vector<std::string>& strings,
         const duration<double> elapsed = high_resolution_clock::now() - start;
         if (!tuning) {
             std::cout << "\r[" << elapsed.count()
-                      << "] Fitness: " << best_metric;
+                      << "] Fitness: " << best_metric << std::flush;
         }
     } while (high_resolution_clock::now() - start < seconds(max_time));
 
     const duration<double> elapsed = high_resolution_clock::now() - start;
     if (!tuning) {
-        std::cout << "\r[" << elapsed.count() << "] Fitness: " << best_metric
-                  << "\n";
+        std::cout << "\r[" << elapsed.count()
+                  << "] Best fitness: " << best_metric << "\n";
+        std::cout << "Best solution: " << best_solution << "\n";
     } else {
         std::cout << "-" << best_metric << "\n";
     }

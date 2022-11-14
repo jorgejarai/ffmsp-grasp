@@ -11,6 +11,8 @@ $ cmake ..
 $ make
 ```
 
+El ejecutable final (`genetic`) se va a encontrar dentro de la carpeta `build/`.
+
 ## Ejecución
 
 ```console

@@ -30,8 +30,7 @@ enable_cxx_compiler_flag_if_supported("-pedantic")
 include_directories(include)
 include_directories(3rdparty/argumentum/include)
 
-add_executable(genetic src/main.cpp src/ffmsp.cpp src/grasp.cpp src/greedy.cpp
-    src/timer.cpp src/rng.cpp src/crossover.cpp src/selection.cpp src/mutation.cpp
-    src/genetic.cpp)
-target_link_libraries(genetic argumentum)
-add_dependencies(genetic argumentum)
+add_executable(ils src/main.cpp src/ffmsp.cpp src/grasp.cpp src/greedy.cpp
+    src/timer.cpp src/rng.cpp)
+target_link_libraries(ils argumentum)
+add_dependencies(ils argumentum)

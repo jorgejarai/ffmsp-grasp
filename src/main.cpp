@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    ffmsp::ils(strings, initial_pop, threshold, alpha, timeout);
+    ffmsp::ils(strings, threshold, alpha, timeout);
 
     return 0;
 }

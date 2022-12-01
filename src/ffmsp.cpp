@@ -1,5 +1,6 @@
-#include "ffmsp.h"
+#include "ffmsp/ffmsp.h"
 
+#include <numeric>
 #include <algorithm>
 
 std::size_t ffmsp::hamming(const std::string& str1, const std::string& str2) {
@@ -26,7 +27,7 @@ static std::size_t heuristic_eval(const std::vector<std::string>& strings_over,
                         });
     const std::size_t max_under =
         std::accumulate(std::begin(strings_under), std::end(strings_under), 0,
-                        [](std::size_t acc, const std::string& str) {
+                        [&candidate](std::size_t acc, const std::string& str) {
                             const auto hamming = ffmsp::hamming(str, candidate);
 
                             return std::max(acc, hamming);

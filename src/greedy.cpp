@@ -1,3 +1,5 @@
+#include "ffmsp/greedy.h"
+
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -6,7 +8,7 @@
 #include <set>
 #include <stdexcept>
 
-#include "ffmsp.h"
+#include "ffmsp/ffmsp.h"
 #include "rng.h"
 
 static const std::vector<char> ALPHABET{'A', 'C', 'G', 'T'};

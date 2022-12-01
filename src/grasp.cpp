@@ -1,3 +1,5 @@
+#include "ffmsp/grasp.h"
+
 #include <algorithm>
 #include <future>
 #include <iomanip>
@@ -5,7 +7,8 @@
 #include <optional>
 #include <set>
 
-#include "ffmsp.h"
+#include "ffmsp/ffmsp.h"
+#include "ffmsp/greedy.h"
 
 static std::vector<char> alphabet_without(char c) {
     switch (c) {

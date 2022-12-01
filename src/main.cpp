@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "argumentum/argparse.h"
-#include "ffmsp.h"
+#include "ffmsp/ils.h"
 
 #define STRING_COUNT 10
 
@@ -45,26 +45,12 @@ int main(int argc, char* argv[]) {
     std::string instance;
     double alpha;
     double threshold;
-    std::size_t initial_pop;
     int timeout;
-    int crossover;
-    int mutation;
-    int selection;
-    double crossover_rate;
-    double mutation_rate;
-    bool tuning;
 
     params.add_parameter(instance, "-i").nargs(1);
     params.add_parameter(alpha, "-a").nargs(1);
     params.add_parameter(threshold, "--th").nargs(1);
-    params.add_parameter(initial_pop, "--pop").nargs(1);
     params.add_parameter(timeout, "-t").nargs(1);
-    params.add_parameter(crossover, "--crossover").nargs(1);
-    params.add_parameter(mutation, "--mutation").nargs(1);
-    params.add_parameter(selection, "--selection").nargs(1);
-    params.add_parameter(crossover_rate, "--cross-rate").nargs(1);
-    params.add_parameter(mutation_rate, "--mut-rate").nargs(1);
-    params.add_parameter(tuning, "--tuning").nargs(0);
 
     if (!parser.parse_args(argc, argv, 1)) {
         return 1;
@@ -76,11 +62,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    ffmsp::genetic(strings, initial_pop, threshold, alpha, timeout,
-                   crossover_rate, mutation_rate,
-                   static_cast<ffmsp::crossover_type>(crossover),
-                   static_cast<ffmsp::mutation_type>(mutation),
-                   static_cast<ffmsp::selection_type>(selection), tuning);
+    ffmsp::ils(strings, initial_pop, threshold, alpha, timeout);
 
     return 0;
 }

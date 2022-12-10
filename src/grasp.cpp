@@ -32,21 +32,24 @@ std::string ffmsp::local_search(const std::vector<std::string>& strings,
     };
 
     std::string ret = solution;
+    bool mejora = true;
+    while(mejora){
+        mejora = false;
+        for (std::size_t i = 0; i < ret.size(); ++i) {
+            for (const char other_c : alphabet_without(ret[i])) {
+                std::string new_solution{ret};
+                new_solution[i] = other_c;
 
-    for (std::size_t i = 0; i < ret.size(); ++i) {
-        for (const char other_c : alphabet_without(ret[i])) {
-            std::string new_solution{ret};
-            new_solution[i] = other_c;
+                std::size_t new_metric = metric(new_solution);
+                std::size_t ret_metric = metric(ret);
 
-            std::size_t new_metric = metric(new_solution);
-            std::size_t ret_metric = metric(ret);
-
-            if (new_metric > ret_metric) {
-                ret = new_solution;
+                if (new_metric > ret_metric) {
+                    ret = new_solution;
+                    mejora = true;
+                }
             }
         }
     }
-
     return ret;
 }
 

@@ -11,8 +11,6 @@
 #include "ffmsp/ffmsp.h"
 #include "rng.h"
 
-static const std::vector<char> ALPHABET{'A', 'C', 'G', 'T'};
-
 // For all s ∈ src, it inserts f(s) into sink if f(s) contains a value
 template <typename Src, typename Sink, typename F>
 static void transform_if(Src&& src, Sink&& sink, F&& f) {
@@ -42,7 +40,7 @@ static void check_strings(const std::vector<std::string>& strings) {
 
 static char least_common_char(const std::map<char, std::size_t>& column) {
     // If not all the characters in the alphabet were used
-    if (column.size() < ALPHABET.size()) {
+    if (column.size() < ffmsp::ALPHABET.size()) {
         std::vector<char> used_chars;
 
         // Get all the used characters in the column
@@ -52,7 +50,7 @@ static char least_common_char(const std::map<char, std::size_t>& column) {
 
         // Subtract used_chars from the alphabet to get the unused characters
         std::vector<char> unused_chars;
-        std::set_difference(ALPHABET.begin(), ALPHABET.end(),
+        std::set_difference(ffmsp::ALPHABET.begin(), ffmsp::ALPHABET.end(),
                             used_chars.begin(), used_chars.end(),
                             std::back_inserter(unused_chars));
 
@@ -81,6 +79,20 @@ static bool random_iteration(double alpha) {
     }
 
     return RNG::get_instance().rand_real(0, 1) > alpha;
+}
+
+static std::string regenerate(const std::string& str,
+                              const std::vector<std::string>& strings,
+                              double threshold, double size) {
+    // Remover un trozo de posición aleatoria cuyo tamaño sea size% del string
+    // original
+
+    // Los caracteres a remover se reemplazan por '*'
+
+    // Volver a recorrer el string y reemplazar los '*' por caracteres usando
+    // la heurística greedy
+
+    return "";
 }
 
 ffmsp::result ffmsp::greedy(const std::vector<std::string>& strings,
@@ -118,7 +130,7 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
             used_positions.end());
 
         if (random_iteration(alpha)) {
-            word[pos] = RNG::get_instance().rand_choose(ALPHABET);
+            word[pos] = RNG::get_instance().rand_choose(ffmsp::ALPHABET);
             continue;
         }
 
@@ -132,9 +144,11 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
             used_positions.end());
 
         if (random_iteration(alpha)) {
-            word[pos] = RNG::get_instance().rand_choose(ALPHABET);
+            word[pos] = RNG::get_instance().rand_choose(ffmsp::ALPHABET);
             continue;
         }
+
+        // **** COPIAR DE AQUÍ ****
 
         // Para cada carácter c en  Σ:
         //    Generar un candidato concatenando c
@@ -146,7 +160,7 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
         std::map<char, std::size_t> strings_over_threshold;
 
         // Calculate the metric for every possible candidate
-        for (const auto& c : ALPHABET) {
+        for (const auto& c : ffmsp::ALPHABET) {
             std::string candidate(word);
             candidate[pos] = c;
 
@@ -186,6 +200,10 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
                            : std::nullopt;
             });
 
+        // **** HASTA AQUÍ ****
+        // RNG::get_instance().rand_choose(most_common_candidates); retorna
+        // el caracter escogido
+
         word[pos] = RNG::get_instance().rand_choose(most_common_candidates);
     }
 
@@ -193,6 +211,8 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
         std::cerr << "ERROR ERROR\n";
         std::exit(1);
     }
+
+    // Destruir y reconstruir el string aquí
 
     const auto metric = ffmsp::metric(strings, word, threshold);
 

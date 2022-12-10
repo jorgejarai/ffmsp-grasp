@@ -7,6 +7,8 @@
 
 namespace ffmsp {
 
+static const std::vector<char> ALPHABET{'A', 'C', 'G', 'T'};
+
 struct result {
     std::string str;
     std::size_t metric;

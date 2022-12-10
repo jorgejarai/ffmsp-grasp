@@ -25,8 +25,8 @@ static std::vector<char> alphabet_without(char c) {
     }
 }
 
-std::string local_search(const std::vector<std::string>& strings,
-                         const std::string& solution, double threshold) {
+std::string ffmsp::local_search(const std::vector<std::string>& strings,
+                                const std::string& solution, double threshold) {
     const auto metric = [&strings, threshold](const std::string& candidate) {
         return ffmsp::metric(strings, candidate, threshold);
     };

@@ -5,24 +5,27 @@
 #include <iostream>
 
 #include "ffmsp/ffmsp.h"
-#include "ffmsp/grasp.h"
 #include "ffmsp/greedy.h"
+#include "ffmsp/local_search.h"
 #include "rng.h"
 
 static std::string initial_solution(const std::vector<std::string>& strings,
-                                    double threshold, double alpha) {
+                                    double threshold, double determinism_rate,
+                                    double regeneration) {
     std::string best_solution =
-        ffmsp::random_greedy(strings, threshold, alpha).str;
+        ffmsp::random_greedy(strings, threshold, determinism_rate, regeneration)
+            .str;
     best_solution = ffmsp::local_search(strings, best_solution, threshold);
 
     return best_solution;
 }
 
-static std::string perturbate(const std::string& solution, double alpha) {
+static std::string perturbate(const std::string& solution,
+                              double determinism_rate) {
     std::string ret = solution;
 
     std::size_t n = solution.size();
-    std::size_t k = static_cast<std::size_t>(alpha * n);
+    std::size_t k = static_cast<std::size_t>(determinism_rate * n);
 
     for (std::size_t i = 0; i < k; ++i) {
         std::size_t j = RNG::get_instance().rand_int(0, n - 1);
@@ -33,8 +36,9 @@ static std::string perturbate(const std::string& solution, double alpha) {
 }
 
 ffmsp::result ffmsp::ils(const std::vector<std::string>& strings,
-                         double threshold, double determinism,
-                         double perturbation_rate, int max_time, bool tuning) {
+                         double threshold, double determinism_rate,
+                         double perturbation_rate, double regeneration_rate,
+                         int max_time, bool tuning) {
     using std::chrono::duration;
     using std::chrono::high_resolution_clock;
     using std::chrono::seconds;
@@ -43,7 +47,8 @@ ffmsp::result ffmsp::ils(const std::vector<std::string>& strings,
         return ffmsp::metric(strings, candidate, threshold);
     };
 
-    auto best_solution = initial_solution(strings, threshold, determinism);
+    auto best_solution = initial_solution(strings, threshold, determinism_rate,
+                                          regeneration_rate);
     std::size_t best_metric = metric(best_solution);
 
     std::cout << std::fixed << std::setprecision(3);
@@ -58,9 +63,8 @@ ffmsp::result ffmsp::ils(const std::vector<std::string>& strings,
         auto candidate = perturbate(best_solution, perturbation_rate);
         candidate = local_search(strings, candidate, threshold);
 
-        if (metric(candidate) > best_metric) {
-            // if (ffmsp::is_str_better(strings, candidate, best_solution,
-            //                          threshold)) {
+        if (ffmsp::is_str_better(strings, candidate, best_solution,
+                                 threshold)) {
             best_solution = candidate;
             best_metric = metric(best_solution);
 

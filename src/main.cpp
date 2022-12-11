@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
     std::string instance;
     double determinism;
     double perturbation_rate;
+    double regeneration_rate;
     double threshold;
     int timeout;
     bool tuning;
@@ -52,6 +53,7 @@ int main(int argc, char* argv[]) {
     params.add_parameter(instance, "-i").nargs(1);
     params.add_parameter(determinism, "-d").nargs(1);
     params.add_parameter(perturbation_rate, "-p").nargs(1);
+    params.add_parameter(regeneration_rate, "-r").nargs(1);
     params.add_parameter(threshold, "--th").nargs(1);
     params.add_parameter(timeout, "-t").nargs(1);
     params.add_parameter(tuning, "--tuning").nargs(0);
@@ -66,8 +68,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    ffmsp::ils(strings, threshold, determinism, perturbation_rate, timeout,
-               tuning);
+    ffmsp::ils(strings, threshold, determinism, perturbation_rate,
+               regeneration_rate, timeout, tuning);
 
     return 0;
 }

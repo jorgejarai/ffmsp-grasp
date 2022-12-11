@@ -7,7 +7,7 @@ namespace ffmsp {
 
 result greedy(const std::vector<std::string>& strings, double threshold);
 result random_greedy(const std::vector<std::string>& strings, double threshold,
-                     double alpha);
+                     double alpha, double regeneration);
 
 }  // namespace ffmsp
 

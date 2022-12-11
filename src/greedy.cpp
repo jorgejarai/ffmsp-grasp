@@ -28,7 +28,7 @@ static void check_strings(const std::vector<std::string>& strings) {
         throw std::invalid_argument("strings cannot be empty");
     }
 
-    // Check if any of the strings has a different size than the others
+    // Check if any of the strings has a different rate than the others
     std::size_t size_1st = strings.front().size();
     if (std::any_of(strings.begin(), strings.end(),
                     [size_1st](const std::string& str) {
@@ -83,25 +83,103 @@ static bool random_iteration(double alpha) {
 
 static std::string regenerate(const std::string& str,
                               const std::vector<std::string>& strings,
-                              double threshold, double size) {
-    // Remover un trozo de posición aleatoria cuyo tamaño sea size% del string
-    // original
+                              double threshold, double rate) {
+    const std::size_t string_len = strings.front().size();
 
-    // Los caracteres a remover se reemplazan por '*'
+    auto ret = str;
+
+    std::size_t trozo = rate * string_len;
+    std::size_t posrand = RNG::get_instance().rand_int(0, str.size() - trozo);
+
+    for (std::size_t i = posrand; i < trozo;
+         ++i) {  // Los caracteres a remover se reemplazan por '*'
+        ret[i] = '*';
+    }
+
+    std::vector<std::map<char, std::size_t>> V_j(string_len);
+
+    // Build the frequency map for every character in every column
+    for (std::size_t i = 0; i < strings.size(); ++i) {
+        for (const auto& str : strings) {
+            const auto cur_char = str[i];
+
+            V_j[i][cur_char] += 1;
+        }
+    }
 
     // Volver a recorrer el string y reemplazar los '*' por caracteres usando
     // la heurística greedy
 
-    return "";
+    // Para cada carácter c en  Σ:
+    //    Generar un candidato concatenando c
+    //    Calculamos cuántos strings ≥ métrica para el candidato
+    //    Escogemos el candidato con mayor cantidad
+    //    De no haberlo, se escoge al azar entre los empatados
+    //    Como fallback, escogemos de V_j
+
+    const std::size_t threshold_count = threshold * string_len;
+
+    for (std::size_t pos = 0; pos < ret.size(); ++pos) {
+        if (ret[pos] != '*') {
+            continue;
+        }
+
+        std::map<char, std::size_t> strings_over_threshold;
+
+        // Calculate the metric for every possible candidate
+        for (const auto& c : ffmsp::ALPHABET) {
+            std::string candidate(ret);
+            candidate[pos] = c;
+
+            for (const auto& str : strings) {
+                const std::size_t distance = ffmsp::hamming(candidate, str);
+
+                if (distance >= threshold_count) {
+                    strings_over_threshold[c]++;
+                }
+            }
+        }
+
+        // If there aren't any viable candidates, construct one with one of the
+        // least used characters
+        if (std::all_of(strings_over_threshold.begin(),
+                        strings_over_threshold.end(),
+                        [](const auto& p) { return p.second == 0; })) {
+            ret[pos] = least_common_char(V_j[pos]);
+        }
+
+        // Select the most used candidate (or choose one randomly if there
+        // are more)
+        const auto max_it = std::max_element(
+            strings_over_threshold.begin(), strings_over_threshold.end(),
+            [](const auto& p1, const auto& p2) {
+                return p1.second < p2.second;
+            });
+        std::size_t most_common_count = max_it->second;
+
+        std::vector<char> most_common_candidates;
+        transform_if(
+            strings_over_threshold, std::back_inserter(most_common_candidates),
+            [most_common_count](const auto& pair) -> std::optional<char> {
+                return pair.second == most_common_count
+                           ? std::make_optional(pair.first)
+                           : std::nullopt;
+            });
+
+        ret[pos] = RNG::get_instance().rand_choose(most_common_candidates);
+    }
+
+    return ret;
 }
 
 ffmsp::result ffmsp::greedy(const std::vector<std::string>& strings,
                             double threshold) {
-    return ffmsp::random_greedy(strings, threshold, 1.0);
+    return ffmsp::random_greedy(strings, threshold, 1.0, 0.0);
 }
 
 ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
-                                   double threshold, double alpha) {
+                                   double threshold, double alpha,
+                                   double regeneration) {
     check_strings(strings);
 
     std::size_t string_len = strings.front().size();
@@ -148,8 +226,6 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
             continue;
         }
 
-        // **** COPIAR DE AQUÍ ****
-
         // Para cada carácter c en  Σ:
         //    Generar un candidato concatenando c
         //    Calculamos cuántos strings ≥ métrica para el candidato
@@ -165,7 +241,7 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
             candidate[pos] = c;
 
             for (const auto& str : strings) {
-                const std::size_t distance = hamming(candidate, str);
+                const std::size_t distance = ffmsp::hamming(candidate, str);
 
                 if (distance >= threshold_count) {
                     strings_over_threshold[c]++;
@@ -200,10 +276,6 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
                            : std::nullopt;
             });
 
-        // **** HASTA AQUÍ ****
-        // RNG::get_instance().rand_choose(most_common_candidates); retorna
-        // el caracter escogido
-
         word[pos] = RNG::get_instance().rand_choose(most_common_candidates);
     }
 
@@ -213,6 +285,9 @@ ffmsp::result ffmsp::random_greedy(const std::vector<std::string>& strings,
     }
 
     // Destruir y reconstruir el string aquí
+    if (regeneration > 0) {
+        word = regenerate(word, strings, threshold, regeneration);
+    }
 
     const auto metric = ffmsp::metric(strings, word, threshold);
 

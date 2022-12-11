@@ -30,7 +30,7 @@ enable_cxx_compiler_flag_if_supported("-pedantic")
 include_directories(include)
 include_directories(3rdparty/argumentum/include)
 
-add_executable(ils src/main.cpp src/ffmsp.cpp src/grasp.cpp src/greedy.cpp
+add_executable(ils src/main.cpp src/ffmsp.cpp src/local_search.cpp src/greedy.cpp
     src/timer.cpp src/rng.cpp src/ils.cpp)
 target_link_libraries(ils argumentum)
 add_dependencies(ils argumentum)

@@ -6,8 +6,8 @@
 namespace ffmsp {
 
 result ils(const std::vector<std::string>& strings, double threshold,
-           double determinism, double perturbation_rate, int max_time,
-           bool tuning);
+           double determinism_rate, double perturbation_rate,
+           double regeneration_rate, int max_time, bool tuning);
 
 }  // namespace ffmsp
 

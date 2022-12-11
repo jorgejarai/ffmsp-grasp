@@ -43,14 +43,18 @@ int main(int argc, char* argv[]) {
     parser.config().program(argv[0]);
 
     std::string instance;
-    double alpha;
+    double determinism;
+    double perturbation_rate;
     double threshold;
     int timeout;
+    bool tuning;
 
     params.add_parameter(instance, "-i").nargs(1);
-    params.add_parameter(alpha, "-a").nargs(1);
+    params.add_parameter(determinism, "-d").nargs(1);
+    params.add_parameter(perturbation_rate, "-p").nargs(1);
     params.add_parameter(threshold, "--th").nargs(1);
     params.add_parameter(timeout, "-t").nargs(1);
+    params.add_parameter(tuning, "--tuning").nargs(0);
 
     if (!parser.parse_args(argc, argv, 1)) {
         return 1;
@@ -62,7 +66,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    ffmsp::ils(strings, threshold, alpha, timeout);
+    ffmsp::ils(strings, threshold, determinism, perturbation_rate, timeout,
+               tuning);
 
     return 0;
 }

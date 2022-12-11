@@ -18,6 +18,10 @@ std::size_t hamming(const std::string& a, const std::string& b);
 std::size_t metric(const std::vector<std::string>& strings,
                    const std::string& candidate, double threshold);
 
+bool is_str_better(const std::vector<std::string>& strings,
+                   const std::string& str1, const std::string& str2,
+                   double threshold);
+
 }  // namespace ffmsp
 
 #endif  // FFMSP_FFMSP_H

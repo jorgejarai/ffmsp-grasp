@@ -1,7 +1,7 @@
 #include "ffmsp/ffmsp.h"
 
-#include <numeric>
 #include <algorithm>
+#include <numeric>
 
 std::size_t ffmsp::hamming(const std::string& str1, const std::string& str2) {
     const std::size_t min_size = std::min(str1.size(), str2.size());
@@ -16,10 +16,23 @@ std::size_t ffmsp::hamming(const std::string& str1, const std::string& str2) {
     return distance;
 }
 
-static std::size_t heuristic_eval(const std::vector<std::string>& strings_over,
-                                  const std::vector<std::string>& strings_under,
+static std::size_t heuristic_eval(const std::vector<std::string>& strings,
                                   const std::string& candidate,
                                   double threshold) {
+    const auto threshold_count =
+        static_cast<std::size_t>(threshold * strings[0].size());
+
+    std::vector<std::string> strings_over;
+    std::vector<std::string> strings_under;
+
+    for (const auto& str : strings) {
+        if (ffmsp::hamming(str, candidate) >= threshold_count) {
+            strings_over.push_back(str);
+        } else {
+            strings_under.push_back(str);
+        }
+    }
+
     const std::size_t hamming_sum =
         std::accumulate(std::begin(strings_over), std::end(strings_over), 0,
                         [&candidate](std::size_t sum, const std::string& str) {
@@ -39,21 +52,36 @@ static std::size_t heuristic_eval(const std::vector<std::string>& strings_over,
 std::size_t ffmsp::metric(const std::vector<std::string>& strings,
                           const std::string& candidate, double threshold) {
     const auto threshold_count =
-        static_cast<std::size_t>(threshold * strings[0].size());
+        static_cast<std::size_t>(threshold * candidate.size());
 
-    std::vector<std::string> strings_over;
-    std::vector<std::string> strings_under;
+    std::size_t metric = 0;
 
     for (const auto& str : strings) {
-        if (hamming(str, candidate) >= threshold_count) {
-            strings_over.push_back(str);
-        } else {
-            strings_under.push_back(str);
+        if (ffmsp::hamming(str, candidate) > threshold_count) {
+            ++metric;
         }
     }
 
-    const auto heuristic =
-        heuristic_eval(strings_over, strings_under, candidate, threshold);
+    return metric;
+}
 
-    return 0;
+bool ffmsp::is_str_better(const std::vector<std::string>& strings,
+                          const std::string& str1, const std::string& str2,
+                          double threshold) {
+    const auto metric1 = metric(strings, str1, threshold);
+    const auto metric2 = metric(strings, str2, threshold);
+
+    const auto heuristic1 = heuristic_eval(strings, str1, threshold);
+    const auto heuristic2 = heuristic_eval(strings, str2, threshold);
+
+    return metric1 > metric2 || (metric1 == metric2 && heuristic1 > heuristic2);
+
+    // if (metric(strings, str1, threshold) != metric(strings, str2, threshold))
+    // {
+    //     return metric(strings, str1, threshold) >
+    //            metric(strings, str2, threshold);
+    // }
+
+    // return heuristic_eval(strings, str1, threshold) >
+    //        heuristic_eval(strings, str2, threshold);
 }

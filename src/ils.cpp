@@ -1,13 +1,24 @@
 #include "ffmsp/ils.h"
 
 #include <chrono>
+#include <iomanip>
+#include <iostream>
 
 #include "ffmsp/ffmsp.h"
 #include "ffmsp/grasp.h"
 #include "ffmsp/greedy.h"
 #include "rng.h"
 
-std::string perturbate(const std::string& solution, double alpha) {
+static std::string initial_solution(const std::vector<std::string>& strings,
+                                    double threshold, double alpha) {
+    std::string best_solution =
+        ffmsp::random_greedy(strings, threshold, alpha).str;
+    best_solution = ffmsp::local_search(strings, best_solution, threshold);
+
+    return best_solution;
+}
+
+static std::string perturbate(const std::string& solution, double alpha) {
     std::string ret = solution;
 
     std::size_t n = solution.size();
@@ -22,7 +33,8 @@ std::string perturbate(const std::string& solution, double alpha) {
 }
 
 ffmsp::result ffmsp::ils(const std::vector<std::string>& strings,
-                         double threshold, double alpha, int max_time) {
+                         double threshold, double determinism,
+                         double perturbation_rate, int max_time, bool tuning) {
     using std::chrono::duration;
     using std::chrono::high_resolution_clock;
     using std::chrono::seconds;
@@ -31,25 +43,48 @@ ffmsp::result ffmsp::ils(const std::vector<std::string>& strings,
         return ffmsp::metric(strings, candidate, threshold);
     };
 
-    std::string best_solution =
-        ffmsp::random_greedy(strings, threshold, alpha).str;
-    best_solution = ffmsp::local_search(strings, best_solution, threshold);
+    auto best_solution = initial_solution(strings, threshold, determinism);
     std::size_t best_metric = metric(best_solution);
+
+    std::cout << std::fixed << std::setprecision(3);
+
+    if (!tuning) {
+        std::cout << "[0.000] Fitness: " << static_cast<int>(best_metric)
+                  << "\n";
+    }
 
     const auto start = high_resolution_clock::now();
     do {
-        const auto result = ffmsp::random_greedy(strings, threshold, alpha);
-
-        auto candidate{result.str};
+        auto candidate = perturbate(best_solution, perturbation_rate);
         candidate = local_search(strings, candidate, threshold);
 
-        const auto candidate_metric = metric(candidate);
-
-        if (candidate_metric > best_metric) {
+        if (metric(candidate) > best_metric) {
+            // if (ffmsp::is_str_better(strings, candidate, best_solution,
+            //                          threshold)) {
             best_solution = candidate;
-            best_metric = candidate_metric;
+            best_metric = metric(best_solution);
+
+            if (!tuning) {
+                const auto now =
+                    duration<double>(high_resolution_clock::now() - start)
+                        .count();
+
+                std::cout << "[" << now
+                          << "] Fitness: " << static_cast<int>(best_metric)
+                          << "\n";
+            }
         }
     } while (high_resolution_clock::now() - start < seconds(max_time));
 
-    return {"", 0};
+    if (tuning) {
+        std::cout << -static_cast<int>(best_metric) << "\n";
+    } else {
+        const auto now =
+            duration<double>(high_resolution_clock::now() - start).count();
+
+        std::cout << "[" << now
+                  << "] Fitness: " << static_cast<int>(best_metric) << "\n";
+    }
+
+    return {best_solution, best_metric};
 }

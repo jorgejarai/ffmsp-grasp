@@ -88,12 +88,12 @@ static std::string regenerate(const std::string& str,
 
     auto ret = str;
 
-    std::size_t trozo = rate * string_len;
-    std::size_t posrand = RNG::get_instance().rand_int(0, str.size() - trozo);
+    const std::size_t trozo = string_len * threshold;
+    const std::size_t start =
+        RNG::get_instance().rand_int(0, string_len - trozo - 1);
 
-    for (std::size_t i = posrand; i < trozo;
-         ++i) {  // Los caracteres a remover se reemplazan por '*'
-        ret[i] = '*';
+    for (std::size_t i = 0; i < trozo; ++i) {
+        ret[(start + i) % string_len] = '*';
     }
 
     std::vector<std::map<char, std::size_t>> V_j(string_len);
